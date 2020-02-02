@@ -35,10 +35,10 @@ def main():
     p.world_size = world_size
     p.rect = p.image.get_rect()
     
-    q = Zombie(p, 10, 100, 100)
-    q1 = Zombie(p, 10, 150, 100)
-    q2 = Zombie(p, 10, 200, 100)
-    q3 = Zombie(p, 10, 250, 100)
+    q = Zombie(p, 10, 100, 500)
+    q1 = Zombie(p, 10, 600, 700)
+    q2 = Zombie(p, 10, 300, 400)
+    q3 = Zombie(p, 10, 500, 200)
 
     e.objects.append(p)
     e.objects.append(q)

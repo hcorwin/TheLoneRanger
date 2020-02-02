@@ -147,15 +147,23 @@ class Zombie(Character):
     # Same thing using only pygame utilities
     def move_towards_player(self, time):
         # Find direction vector (dx, dy) between enemy and player.
-        dirvect = pygame.math.Vector2(self.player.x - self.x, self.player.y - self.y)
-        dirvect.normalize()
+        #dirvect = pygame.math.Vector2(self.x - self.player.x, self.y - self.player.y)
+        
+        #NOTE (0, 0) START IN TOP LEFT CORNER
+        
         # Move along this normalized vector towards the player at current speed.
-        if dirvect.x > 0:
+        if self.player.x > self.x and self.player.y < self.y:
+            return (self.move_right(time), self.move_up(time))
+            
+        elif self.player.x > self.x and self.player.y > self.y:
+            return (self.move_right(time), self.move_down(time))
+            
+        elif self.player.x < self.x and self.player.y < self.y:
+            return (self.move_left(time), self.move_up(time))
+            
+        elif self.player.x < self.x and self.player.y > self.y:
+            return (self.move_left(time), self.move_down(time))
+        else:
             return self.move_right(time)
-        elif dirvect.x < 0:
-            return self.move_left(time)
-        #elif dirvect.y = 0:
-            #self.move_up(time)
-        #elif dirvect.x = -1:
-            #self.move_down(time)
+        
             
