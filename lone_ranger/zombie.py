@@ -68,6 +68,72 @@ class Zombie(Character):
                     self.update(0)
         except:
             pass
+            
+    def move_left_up(self, time):
+
+        self.image = pygame.image.load('./assets/zombie_left_up.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image, (64, 64))
+    
+        self.collisions = []
+        amount = self.delta * time
+        try:
+            if self.x - amount < 0:
+                raise OffScreenLeftException
+            elif self.y - amount < 0:
+                raise OffScreenTopException
+            else:
+                self.x = self.x - amount
+                self.y = self.y - amount
+                self.update(0)
+                while(len(self.collisions) != 0):
+                    self.x = self.x + amount
+                    self.y = self.y + amount
+                    self.update(0)
+        except:
+            pass
+            
+    def move_up(self, time):
+
+        self.image = pygame.image.load('./assets/zombie_up.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image, (64, 64))
+    
+        self.collisions = []
+        amount = self.delta * time
+        try:
+            if self.y - amount < 0:
+                raise OffScreenTopException
+            else:
+                self.y = self.y - amount
+                self.update(0)
+                if len(self.collisions) != 0:
+                    self.y = self.y + amount
+                    self.update(0)
+                    self.collisions = []
+        except:
+            pass
+            
+    def move_right_up(self, time):
+
+        self.image = pygame.image.load('./assets/zombie_right_up.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image, (64, 64))
+    
+        self.collisions = []
+        amount = self.delta * time
+        try:
+            if self.x + amount > self.world_size[0] - Settings.tile_size:
+                raise OffScreenRightException
+            elif self.y - amount < 0:
+                raise OffScreenTopException
+            else:
+                self.x = self.x + amount
+                self.y = self.y - amount
+                self.update(0)
+                while(len(self.collisions) != 0):
+                    self.x = self.x - amount
+                    self.y = self.y + amount
+                    self.update(0)
+        except:
+            pass
 
     def move_right(self, time):
 
@@ -87,24 +153,27 @@ class Zombie(Character):
                     self.update(0)
         except:
             pass
+            
+    def move_right_down(self, time):
 
-    def move_up(self, time):
-
-        self.image = pygame.image.load('./assets/zombie_up.png').convert_alpha()
+        self.image = pygame.image.load('./assets/zombie_right_down.png').convert_alpha()
         self.image = pygame.transform.scale(self.image, (64, 64))
-        
+    
         self.collisions = []
         amount = self.delta * time
         try:
-            if self.y - amount < 0:
-                raise OffScreenTopException
+            if self.x + amount > self.world_size[0] - Settings.tile_size:
+                raise OffScreenRightException
+            elif self.y + amount > self.world_size[1] - Settings.tile_size:
+                raise OffScreenBottomException
             else:
-                self.y = self.y - amount
+                self.x = self.x + amount
+                self.y = self.y + amount
                 self.update(0)
-                if len(self.collisions) != 0:
-                    self.y = self.y + amount
+                while(len(self.collisions) != 0):
+                    self.x = self.x - amount
+                    self.y = self.y - amount
                     self.update(0)
-                    self.collisions = []
         except:
             pass
 
@@ -127,6 +196,29 @@ class Zombie(Character):
                     self.collisions = []
         except:
             pass
+            
+    def move_left_down(self, time):
+
+        self.image = pygame.image.load('./assets/zombie_left_down.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image, (64, 64))
+    
+        self.collisions = []
+        amount = self.delta * time
+        try:
+            if self.x - amount < 0:
+                raise OffScreenLeftException
+            elif self.y + amount > self.world_size[1] - Settings.tile_size:
+                raise OffScreenBottomException
+            else:
+                self.x = self.x - amount
+                self.y = self.y + amount
+                self.update(0)
+                while(len(self.collisions) != 0):
+                    self.x = self.x + amount
+                    self.y = self.y + amount
+                    self.update(0)
+        except:
+            pass
 
     def update(self, time):
         self.rect.x = self.x
@@ -143,27 +235,37 @@ class Zombie(Character):
         if now - self.last_hit > 1000:
             self.health = self.health - 10
             self.last_hit = now
-            
-    # Same thing using only pygame utilities
+
     def move_towards_player(self, time):
         # Find direction vector (dx, dy) between enemy and player.
         #dirvect = pygame.math.Vector2(self.x - self.player.x, self.y - self.player.y)
         
         #NOTE (0, 0) START IN TOP LEFT CORNER
         
-        # Move along this normalized vector towards the player at current speed.
-        if self.player.x > self.x and self.player.y < self.y:
-            return (self.move_right(time), self.move_up(time))
-            
-        elif self.player.x > self.x and self.player.y > self.y:
-            return (self.move_right(time), self.move_down(time))
-            
-        elif self.player.x < self.x and self.player.y < self.y:
-            return (self.move_left(time), self.move_up(time))
-            
-        elif self.player.x < self.x and self.player.y > self.y:
-            return (self.move_left(time), self.move_down(time))
+        move = None
+
+        if self.x > self.player.x and self.y == self.player.y:
+            move = self.move_left(time)
+        elif self.x < self.player.x and self.y == self.player.y:
+            move = self.move_right(time)
+        elif self.x == self.player.x and self.y > self.player.y:
+            move = self.move_up(time)
+        elif self.x == self.player.x and self.y < self.player.y:
+            move = self.move_down(time)
+        elif self.x > self.player.x and self.y > self.player.y:
+            move = self.move_left_up(time)
+        elif self.x > self.player.x and self.y < self.player.y:
+            move = self.move_left_down(time)
+        elif self.x < self.player.x and self.y > self.player.y:
+            move = self.move_right_up(time)
+        elif self.x < self.player.x and self.y < self.player.y:
+            move = self.move_right_down(time)
         else:
-            return self.move_right(time)
+            pass
+            
+        return move
+        
+            
+        
         
             
