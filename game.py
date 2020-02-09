@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import pygame
 import sys
 sys.path.append('../')
@@ -25,16 +24,16 @@ class Game():
         self.zombies = None
         self.camera = None
 
-    def spawn_zombies(self):
+    def spawn_zombies(t):
         r1 = randint(1, 800)
         r2 = randint(1, 600)
-        self.zombies.append(Zombie(self.player, 10, r1, r2))
-        self.engine.objects.append(self.zombies)
-        self.engine.drawables.add(self.zombies)
+        z = Zombie(t.player, 0, t.player.x + 100, t.player.y + 100)
+        t.engine.objects.append(z)
+        t.engine.drawables.add(z)
         # Register collisions for zombies
-        self.engine.collisions[self.player] = (self.zombies, self.player.ouch)
+        t.engine.collisions[t.player] = (z, t.player.ouch)
         # Register zombie movements in event list
-        self.engine.events[pygame.USEREVENT] = self.zombies.move_towards_player
+        t.engine.events[pygame.USEREVENT] = t.zombies.move_towards_player
 
     # Create engine
     engine = league.Engine("The Lone Ranger")
