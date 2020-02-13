@@ -12,6 +12,12 @@ class Player(Character):
         super().__init__(z, x, y)
         # This unit's health
         self.health = 100
+        #Length of time that can be sprinted
+        self.sprintTime = 25
+        #Time since last sprint
+        self.sprintCooldown = 10
+        #Can or cannot sprint
+        self.canSprint = True
         # Last time I was hit
         self.last_hit = pygame.time.get_ticks()
         # A unit-less value.  Bigger is faster.
@@ -31,6 +37,7 @@ class Player(Character):
         # Which collision detection function?
         self.collide_function = pygame.sprite.collide_circle
         self.collisions = []
+        self.lives = 4
         # For collision detection, we need to compare our sprite
         # with collideable sprites.  However, we have to remap
         # the collideable sprites coordinates since they change.
@@ -42,25 +49,91 @@ class Player(Character):
         self.collider.rect = self.collider.image.get_rect()
         # Overlay
         self.font = pygame.font.Font('freesansbold.ttf',32)
-        self.overlay = self.font.render(str(self.health) + "        4 lives", True, (0,0,0))
+        self.overlay = self.font.render(str(self.health) + "        " + str(self.lives), True, (0,0,0))
 
-    def move_left(self, time):
     
-        self.image = pygame.image.load('./assets/ranger_left.png').convert_alpha()
-        self.image = pygame.transform.scale(self.image, (64, 64))
-    
-        amount = self.delta * time
-        try:
-            if self.x - amount < 0:
-                raise OffScreenLeftException
+    def updateSprite(self,keys):
+        if keys[pygame.K_d]:
+            if keys[pygame.K_w]:
+                self.image = pygame.image.load('./assets/ranger_right_up.png').convert_alpha()
+            elif keys[pygame.K_s]: 
+                self.image = pygame.image.load('./assets/ranger_right_down.png').convert_alpha()
             else:
-                self.x = self.x - amount
-                self.update(0)
-                while(len(self.collisions) != 0):
-                    self.x = self.x + amount
-                    self.update(0)
-        except:
-            pass
+                self.image = pygame.image.load('./assets/ranger_right.png').convert_alpha()
+
+        elif keys[pygame.K_a]:
+            if keys[pygame.K_w]:
+                self.image = pygame.image.load('./assets/ranger_left_up.png').convert_alpha()
+
+            elif keys[pygame.K_s]: 
+                self.image = pygame.image.load('./assets/ranger_left_down.png').convert_alpha()
+
+            else:
+                self.image = pygame.image.load('./assets/ranger_left.png').convert_alpha()
+
+        elif keys[pygame.K_w]:
+            self.image = pygame.image.load('./assets/ranger_up.png').convert_alpha()
+        elif keys[pygame.K_s]:
+            self.image = pygame.image.load('./assets/ranger_down.png').convert_alpha()
+
+        self.image = pygame.transform.scale(self.image, (64, 64))
+        
+    def move(self, time, keys):
+    
+        #self.image = pygame.image.load('./assets/ranger_left.png').convert_alpha()
+       
+
+        amount = self.delta * time
+
+        self.moveExecepts()
+        
+        if keys[pygame.K_LSHIFT] and self.sprintTime > 0 and self.canSprint:
+            amount = amount * 1.5           
+            self.sprintTime = self.sprintTime - 1
+            if self.sprintCooldown > 0:
+                self.sprintCooldown = self.sprintCooldown - 1
+        
+        if self.sprintTime < 25 and self.sprintCooldown == 10:
+    
+            self.sprintTime = self.sprintTime + 1
+            if self.sprintTime > 10:
+                self.canSprint = True
+       
+        if self.sprintCooldown < 10:
+            if self.sprintCooldown == 0 and self.sprintTime == 0 and self.canSprint:
+                self.canSprint = False 
+            elif self.canSprint == False:
+                self.sprintCooldown = self.sprintCooldown + 1  
+        
+
+        if (keys[pygame.K_a] and keys[pygame.K_s]) or (keys[pygame.K_a] and keys[pygame.K_w]):
+            amount =  amount / 2
+
+        if (keys[pygame.K_d] and keys[pygame.K_s]) or (keys[pygame.K_d] and keys[pygame.K_w]):
+            amount =  amount / 2
+
+        if keys[pygame.K_a]:
+            self.x = self.x - amount
+            self.update(0)
+            
+        
+        if keys[pygame.K_d]:
+            self.x = self.x + amount
+            self.update(0)
+            
+
+        if keys[pygame.K_w]:
+            self.y = self.y - amount
+            self.update(0)
+            
+        if keys[pygame.K_s]:
+            self.y = self.y + amount
+            self.update(0)
+          
+        self.updateSprite(keys)
+
+       
+       
 
     def move_right(self, time):
     
@@ -85,7 +158,7 @@ class Player(Character):
     
         self.image = pygame.image.load('./assets/ranger_up.png').convert_alpha()
         self.image = pygame.transform.scale(self.image, (64, 64))
-    
+        self.image = pygame.image.load('./assets/ranger_down.png').convert_alpha()
         self.collisions = []
         amount = self.delta * time
         try:
@@ -120,6 +193,35 @@ class Player(Character):
         except:
             pass
 
+    def moveExecepts(self):
+        try:
+            if self.y + amount > self.world_size[1] - Settings.tile_size:
+                raise OffScreenBottomException
+            if self.y - amount < 0:
+                raise OffScreenTopException
+            if self.x + amount > self.world_size[0] - Settings.tile_size:
+                raise OffScreenRightException
+            if self.x - amount < 0:
+                raise OffScreenLeftException
+        except:
+            pass
+
+    def move_NE(self,time):
+        self.move_up(time/2)
+        self.move_right(time/2)
+
+    def move_SE(self,time):
+        self.move_down(time/2)
+        self.move_right(time/2)
+
+    def move_NW(self,time):
+        self.move_up(time/2)
+        self.move_left(time/2)
+
+    def move_SW(self,time):
+        self.move_down(time/2)
+        self.move_left(time/2)    
+
     def update(self, time):
         self.rect.x = self.x
         self.rect.y = self.y
@@ -135,3 +237,8 @@ class Player(Character):
         if now - self.last_hit > 1000:
             self.health = self.health - 10
             self.last_hit = now
+        if self.health <= 0:
+            self.health = 100
+            self.lives = self.lives - 1
+
+    
