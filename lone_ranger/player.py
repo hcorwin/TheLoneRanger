@@ -50,42 +50,45 @@ class Player(Character):
         # Overlay
         self.font = pygame.font.Font('freesansbold.ttf',32)
         self.overlay = self.font.render(str(self.health) + "        " + str(self.lives), True, (0,0,0))
-
-    
+        #player images
+        self.icon = [0,0,0,0,0,0,0,0]
+        self.icon[0] = pygame.image.load('./assets/ranger_up.png').convert_alpha()
+        self.icon[1] = pygame.transform.rotate(self.icon[0], 315).convert_alpha()
+        self.icon[2] = pygame.transform.rotate(self.icon[0], 270).convert_alpha()
+        self.icon[3] = pygame.transform.rotate(self.icon[0], 225).convert_alpha()
+        self.icon[4] = pygame.transform.rotate(self.icon[0], 180).convert_alpha()
+        self.icon[5] = pygame.transform.rotate(self.icon[0], 135).convert_alpha()
+        self.icon[6] = pygame.transform.rotate(self.icon[0], 90).convert_alpha()
+        self.icon[7] = pygame.transform.rotate(self.icon[0], 45).convert_alpha()
     def updateSprite(self,keys):
         if keys[pygame.K_d]:
             if keys[pygame.K_w]:
-                self.image = pygame.image.load('./assets/ranger_right_up.png').convert_alpha()
+                self.image = self.icon[1]
             elif keys[pygame.K_s]: 
-                self.image = pygame.image.load('./assets/ranger_right_down.png').convert_alpha()
+                self.image = self.icon[3]
             else:
-                self.image = pygame.image.load('./assets/ranger_right.png').convert_alpha()
+                self.image = self.icon[2]
 
         elif keys[pygame.K_a]:
             if keys[pygame.K_w]:
-                self.image = pygame.image.load('./assets/ranger_left_up.png').convert_alpha()
+                self.image = self.icon[7]
 
             elif keys[pygame.K_s]: 
-                self.image = pygame.image.load('./assets/ranger_left_down.png').convert_alpha()
+                self.image = self.icon[5]
 
             else:
-                self.image = pygame.image.load('./assets/ranger_left.png').convert_alpha()
+                self.image = self.icon[6]
 
         elif keys[pygame.K_w]:
-            self.image = pygame.image.load('./assets/ranger_up.png').convert_alpha()
+            self.image = self.icon[0]
         elif keys[pygame.K_s]:
-            self.image = pygame.image.load('./assets/ranger_down.png').convert_alpha()
-
+            self.image = self.icon[4]
         self.image = pygame.transform.scale(self.image, (64, 64))
         
     def move(self, time, keys):
-    
-        #self.image = pygame.image.load('./assets/ranger_left.png').convert_alpha()
        
 
-        amount = self.delta * time
-
-        self.moveExecepts()
+        amount = self.delta * time  
         
         if keys[pygame.K_LSHIFT] and self.sprintTime > 0 and self.canSprint:
             amount = amount * 1.5           
@@ -113,114 +116,63 @@ class Player(Character):
             amount =  amount / 2
 
         if keys[pygame.K_a]:
-            self.x = self.x - amount
-            self.update(0)
+            try:
+                if self.x - amount < 0:
+                    raise OffScreenLeftExcepzombietion
+                else:
+                    self.x = self.x - amount
+                    self.update(0)
+                    while(len(self.collisions) != 0):
+                       self.x = self.x + amount
+                       self.update(0)
+            except:
+                pass
             
         
         if keys[pygame.K_d]:
-            self.x = self.x + amount
-            self.update(0)
+            try:
+                if self.x + amount > self.world_size[0] - Settings.tile_size:
+                    raise OffScreenRightException
+                else:
+                    self.x = self.x + amount
+                    self.update(0)
+                    while(len(self.collisions) != 0):
+                        self.x = self.x - amount
+                        self.update(0)
+            except:
+                pass
             
 
         if keys[pygame.K_w]:
-            self.y = self.y - amount
-            self.update(0)
-            
-        if keys[pygame.K_s]:
-            self.y = self.y + amount
-            self.update(0)
-          
-        self.updateSprite(keys)
-
-       
-       
-
-    def move_right(self, time):
-    
-        self.image = pygame.image.load('./assets/ranger_right.png').convert_alpha()
-        self.image = pygame.transform.scale(self.image, (64, 64))
-    
-        self.collisions = []
-        amount = self.delta * time
-        try:
-            if self.x + amount > self.world_size[0] - Settings.tile_size:
-                raise OffScreenRightException
-            else:
-                self.x = self.x + amount
-                self.update(0)
-                while(len(self.collisions) != 0):
-                    self.x = self.x - amount
-                    self.update(0)
-        except:
-            pass
-
-    def move_up(self, time):
-    
-        self.image = pygame.image.load('./assets/ranger_up.png').convert_alpha()
-        self.image = pygame.transform.scale(self.image, (64, 64))
-        self.image = pygame.image.load('./assets/ranger_down.png').convert_alpha()
-        self.collisions = []
-        amount = self.delta * time
-        try:
-            if self.y - amount < 0:
-                raise OffScreenTopException
-            else:
-                self.y = self.y - amount
-                self.update(0)
-                if len(self.collisions) != 0:
-                    self.y = self.y + amount
-                    self.update(0)
-                    self.collisions = []
-        except:
-            pass
-
-    def move_down(self, time):
-    
-        self.image = pygame.image.load('./assets/ranger_down.png').convert_alpha()
-        self.image = pygame.transform.scale(self.image, (64, 64))
-    
-        amount = self.delta * time
-        try:
-            if self.y + amount > self.world_size[1] - Settings.tile_size:
-                raise OffScreenBottomException
-            else:
-                self.y = self.y + amount
-                self.update(0)
-                if len(self.collisions) != 0:
+            try:
+                if self.y - amount < 0:
+                    raise OffScreenTopException
+                else:
                     self.y = self.y - amount
                     self.update(0)
+                    if len(self.collisions) != 0:
+                        self.y = self.y + amount
+                        self.update(0)
+                        self.collisions = []
+            except:
+                pass
+            
+        if keys[pygame.K_s]:
+            try:
+                if self.y + amount > self.world_size[1] - Settings.tile_size:
+                    raise OffScreenBottomException
+                else:
+                    self.y = self.y + amount
+                    self.update(0)
+                    if len(self.collisions) != 0:
+                        self.y = self.y - amount
+                        self.update(0)
                     self.collisions = []
-        except:
-            pass
-
-    def moveExecepts(self):
-        try:
-            if self.y + amount > self.world_size[1] - Settings.tile_size:
-                raise OffScreenBottomException
-            if self.y - amount < 0:
-                raise OffScreenTopException
-            if self.x + amount > self.world_size[0] - Settings.tile_size:
-                raise OffScreenRightException
-            if self.x - amount < 0:
-                raise OffScreenLeftException
-        except:
-            pass
-
-    def move_NE(self,time):
-        self.move_up(time/2)
-        self.move_right(time/2)
-
-    def move_SE(self,time):
-        self.move_down(time/2)
-        self.move_right(time/2)
-
-    def move_NW(self,time):
-        self.move_up(time/2)
-        self.move_left(time/2)
-
-    def move_SW(self,time):
-        self.move_down(time/2)
-        self.move_left(time/2)    
+            except:
+                pass
+          
+        self.updateSprite(keys)
+    
 
     def update(self, time):
         self.rect.x = self.x

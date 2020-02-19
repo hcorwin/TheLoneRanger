@@ -46,11 +46,11 @@ def main():
     e.objects.append(o)
 
     
-    #need to register more collisions with new zombie here
+    
     
     #Register events?
     pygame.time.set_timer(pygame.USEREVENT + 0, 250// league.Settings.gameTimeFactor)
-    pygame.time.set_timer(pygame.USEREVENT + 1, 500 // league.Settings.gameTimeFactor)
+    pygame.time.set_timer(pygame.USEREVENT + 1, 250 // league.Settings.gameTimeFactor)
  
     #Player movements
 
@@ -59,27 +59,36 @@ def main():
     e.key_events[pygame.K_w] = p.move
     e.key_events[pygame.K_s] = p.move
     
+   
+    '''
+    Spawns Zombies with a 25% freqency every 250ms
+    '''
     def spwanZombies(time):       
-        if random.randint(1, 100) > 60:
-            z = Zombie(p,10, p.x + 100, p.y + 100)
+        if random.randint(1, 100) > 75:
+            z = Zombie(p,10, p.x + (c.width + 10), p.y)
             e.drawables.add(z)
             e.objects.append(z)     
+            #z.blocks.add(t.impassable)
             e.collisions[z] = (p, p.ouch)
+            
+
+
+    '''
+    Moves zombies every 250ms
+    '''
 
     def updateZoms(time):
         for i in e.objects:
-            if isinstance(i,Zombie) and random.randint(1,100) > 50:
+            if isinstance(i,Zombie) and random.randint(1,100) > 25:
                     i.move_towards_player(time)  
         e.objects.remove(c)
-        e.objects.append(c) 
+        e.objects.append(c)
         print(len(e.objects))    
     
     #Register zombie movements in event list
     e.events[pygame.USEREVENT] = updateZoms
     e.events[pygame.USEREVENT + 1] =  spwanZombies
-    #e.events[pygame.USEREVENT + 1] = q.move_right
-    #e.events[pygame.USEREVENT + 2] = q.move_up
-    #e.events[pygame.USEREVENT + 3] = q.move_down
+ 
     
     
     #Sets up exit button to quit game
