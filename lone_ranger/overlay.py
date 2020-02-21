@@ -2,8 +2,10 @@ import league
 import pygame
 
 class Overlay(league.DUGameObject):
+
     def __init__(self, player):
         super().__init__(self)
+
         self._layer = 1000
         self.player = player
         self.font = pygame.font.Font('freesansbold.ttf',32)
@@ -20,5 +22,5 @@ class Overlay(league.DUGameObject):
 
     def update(self, deltaTime):
         self.image.fill((127, 127, 127))
-        self.text = self.font.render(str(self.player.health) + "        4 lives", True, (0,0,0))
+        self.text = self.font.render(str(self.player.health) + "       " + str(self.player.lives) + " lives" + "                Kills: " + str(self.player.kills), True, (0,0,0))
         self.image.blit(self.text, (0, 0))

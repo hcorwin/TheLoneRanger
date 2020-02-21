@@ -7,8 +7,8 @@ class GameObject(abc.ABC):
     pass
 
 class Drawable(pygame.sprite.Sprite):
-    """Creates a drawable.  For us, a drawable is a pygame Sprite object."""
-    def __init__(self, layer=0, x=0, y=0):
+    """Creates a drawable. For us, a drawable is a pygame Sprite object."""
+    def __init__(self, layer = 0, x = 0, y = 0):
         super().__init__()
         self._layer = layer
         self.image = None
@@ -27,7 +27,7 @@ class UGameObject(GameObject, Updateable):
     pass
 
 class DGameObject(GameObject, Drawable):
-    """A game object that is drawable, but not updateable.  A static object."""
+    """A game object that is drawable, but not updateable. A static object."""
     pass
 
 class DUGameObject(UGameObject, Drawable):

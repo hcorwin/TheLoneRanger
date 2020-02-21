@@ -63,7 +63,7 @@ class Engine:
         # Set the repeat delay for key presses
         pygame.key.set_repeat(Settings.key_repeat)
         # Create statistics font
-        self.statistics_font = pygame.font.Font(None,30)
+        self.statistics_font = pygame.font.Font(None, 30)
 
     def run(self):
         """The main game loop.  As close to our book code as possible."""
