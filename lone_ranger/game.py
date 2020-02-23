@@ -76,9 +76,12 @@ def main():
     Spawns Zombies with a 25% freqency every 250ms
     '''
     def spwanZombies(time): 
+        listx = [0, 0, 400, 800]
+        listy = [0, 300, 0, 300]
+        randomInt = random.randint(0,3)
         if p.zombieCount < p.wave * 5:
             if random.randint(1, 100) > 75:
-                z = Zombie(p,10, p.x + (c.width + 10), p.y)
+                z = Zombie(p, 10, listx[randomInt], listy[randomInt])
                 e.drawables.add(z)
                 e.objects.append(z)     
                 e.collisions[z] = (p, p.ouch)
