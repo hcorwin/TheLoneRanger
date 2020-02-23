@@ -46,3 +46,7 @@ class Direction(IntEnum):
     SOUTH = 1
     EAST = 2
     WEST = 3
+    NORTHEAST = 4
+    NORTHWEST = 5
+    SOUTHWEST = 6
+    SOUTHEAST = 7
