@@ -67,6 +67,7 @@ class Player(Character):
         self.wave = 1
         #number of zomibes spawned in current wave
         self.zombieCount = 0
+        self.lastShot = pygame.time.get_ticks()
 
     def updateSprite(self,keys):
         if keys[pygame.K_d]:
