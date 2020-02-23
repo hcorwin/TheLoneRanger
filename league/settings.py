@@ -43,10 +43,10 @@ class Direction(IntEnum):
     """Direction enumerates character directions for readability.  Cardinal
     directions are predefined, add your own as needed."""
     NORTH = 0
-    SOUTH = 1
+    SOUTH = 4
     EAST = 2
-    WEST = 3
-    NORTHEAST = 4
-    NORTHWEST = 5
-    SOUTHWEST = 6
-    SOUTHEAST = 7
+    WEST = 6
+    NORTHEAST = 1
+    NORTHWEST = 7
+    SOUTHWEST = 5
+    SOUTHEAST = 3
