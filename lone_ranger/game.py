@@ -7,101 +7,144 @@ import league
 from player import Player
 from zombie import Zombie
 from overlay import Overlay
-from random import *
+from bullet import Bullet
+import random
 
+"""This file is garbage. It was a hastily coded mockup
+to demonstrate how to use the engine.  We will be creating
+a Game class that organizes this code better (and is
+reusable).
 """
-Game Class
-"""
 
-class Game():
+# Function to call when colliding with zombie
 
-    def __init__(self):
+def main():
     
-        self.engine = None
-        self.sprites = None
-        self.backgroundTiles = None
-        self.foregroundTiles = None
-        self.world_size = None
-        self.player = None
-        self.overlay = None
-        self.numZombies = None
-        self.zombies = None
-        self.camera = None
-        
-        #Create engine
-        engine = league.Engine("The Lone Ranger")
-        engine.init_pygame()
-        
-        #Setup the world
-        sprites = league.Spritesheet('./assets/base_chip_pipo.png', league.Settings.tile_size, 8)
-        backgroundTiles = league.Tilemap('./assets/background.lvl', sprites, layer = 0)
-        foregroundTiles = league.Tilemap('./assets/world.lvl', sprites, layer = 1)
-        world_size = (foregroundTiles.wide * league.Settings.tile_size, foregroundTiles.high * league.Settings.tile_size)
-        engine.drawables.add(backgroundTiles.passable.sprites())
-        engine.drawables.add(foregroundTiles.passable.sprites())
-        
-        #Create player object
-        player = Player(2, 400, 300)
-        player.blocks.add(foregroundTiles.impassable)
-        player.world_size = world_size
-        player.rect = player.image.get_rect()
-        engine.objects.append(player)
-        engine.drawables.add(player)
-        
-        #Create overlay
-        overlay = Overlay(player)
-        engine.objects.append(overlay)
-        engine.drawables.add(overlay)
-        
-        #Create zombies
-        numZombies = 4
-        
-        zombies = []
-        randNum = 0
-        
-        for zombie in range(0, numZombies):
-            zombies.append(Zombie(player, 10, 100 + randNum, 500 + randNum))
-            engine.objects.append(zombies[zombie])
-            engine.drawables.add(zombies[zombie])
-            randNum = randint(1, 400)
-        
-        #Create camera that follows player
-        camera = league.LessDumbCamera(800, 600, player, engine.drawables, world_size)
-        engine.objects.append(camera)
-        engine.objects.append(camera)
-        
-        engine.collisions[player] = (zombies[0], player.ouch)
-        #need to register more collisions with new zombie here
-        
-        #Register events?
-        pygame.time.set_timer(pygame.USEREVENT + 0, 1000 // league.Settings.gameTimeFactor)
-        pygame.time.set_timer(pygame.USEREVENT + 1, 1000 // league.Settings.gameTimeFactor)
-        pygame.time.set_timer(pygame.USEREVENT + 2, 1000 // league.Settings.gameTimeFactor)
-        pygame.time.set_timer(pygame.USEREVENT + 3, 1000 // league.Settings.gameTimeFactor)
-        
-        #Player movements
-        engine.key_events[pygame.K_a] = player.move_left
-        engine.key_events[pygame.K_d] = player.move_right
-        engine.key_events[pygame.K_w] = player.move_up
-        engine.key_events[pygame.K_s] = player.move_down
-        
-        #Register zombie movements in event list
-        engine.events[pygame.USEREVENT + 0] = zombies[0].move_towards_player
-        engine.events[pygame.USEREVENT + 1] = zombies[1].move_towards_player
-        engine.events[pygame.USEREVENT + 2] = zombies[2].move_towards_player
-        engine.events[pygame.USEREVENT + 3] = zombies[3].move_towards_player
-        #e.events[pygame.USEREVENT + 1] = q.move_right
-        #e.events[pygame.USEREVENT + 2] = q.move_up
-        #e.events[pygame.USEREVENT + 3] = q.move_down
-        
-        
-        #Sets up exit button to quit game
-        engine.events[pygame.QUIT] = engine.stop
-        
-        engine.run()
-        
-    def main():
-        game = Game()
+    e = league.Engine("The Lone Ranger")
+    e.init_pygame()
 
-if __name__ == '__main__':
-    Game().main()
+    sprites = league.Spritesheet('./assets/base_chip_pipo.png', league.Settings.tile_size, 8)
+    t = league.Tilemap('./assets/world.lvl', sprites, layer = 1)
+    b = league.Tilemap('./assets/background.lvl', sprites, layer = 0)
+    world_size = (t.wide * league.Settings.tile_size, t.high * league.Settings.tile_size)
+    
+    e.drawables.add(t.passable.sprites())
+    e.drawables.add(b.passable.sprites())
+    
+    p = Player(2, 400, 300)
+    o = Overlay(p)
+    p.blocks.add(t.impassable)
+    p.world_size = world_size
+    p.rect = p.image.get_rect()
+    
+    e.drawables.add(p)
+    
+    e.drawables.add(o)
+    
+    c = league.LessDumbCamera(800, 600, p, e.drawables, world_size)
+    
+    e.objects.append(c)
+    e.objects.append(o)
+
+    wave = 1
+    zombieCount = 0
+    
+    
+    #Register events?
+    pygame.time.set_timer(pygame.USEREVENT + 0, 250// league.Settings.gameTimeFactor)
+    pygame.time.set_timer(pygame.USEREVENT + 1, 250 // league.Settings.gameTimeFactor)
+ 
+    #Player movements
+
+
+    
+    zombies = []
+
+    
+    def shot(zombie, bullet, time):
+        zombie.ouch()
+      #  e.objects.remove(bullet)
+       # e.drawables.remove(bullet)
+
+
+    def shoot(time):
+        now = pygame.time.get_ticks()
+        if now - p.lastShot > 500:
+            bullet = Bullet(p.direction,10, p.x, p.y)
+            e.objects.append(bullet)
+            e.drawables.add(bullet)
+     
+            
+            for z in zombies:
+                e.collisions[z] = (bullet,z.ouch)
+           
+
+            p.lastShot = now
+    
+   
+    '''
+    Spawns Zombies with a 25% freqency every 250ms
+    '''
+    def spwanZombies(time): 
+        if p.zombieCount < 20:
+            if random.randint(1, 100) > 75:
+                z = Zombie(p,10, p.x + 350 , p.y +350)
+                e.drawables.add(z)
+                e.objects.append(z)     
+                e.collisions[z] = (p, p.ouch)
+                p.zombieCount = p.zombieCount +1
+                zombies.append(z)
+    
+                
+            
+    def moveAndShoot(time):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_w] or keys[pygame.K_a] or keys[pygame.K_s] or keys[pygame.K_d]  :
+            p.move(time ,pygame.key.get_pressed())
+        if  keys[pygame.K_SPACE]:
+            shoot(time)
+
+    '''
+    Moves zombies every 250ms
+    '''
+
+    def updateZoms(time):
+        for i in e.objects:
+            if isinstance(i,Zombie):
+                #if random.randint(1,100) > 25:
+                  #  i.move_towards_player(time)
+                if i.health <= 0:
+                    e.objects.remove(i)
+                    e.drawables.remove(i)
+                    zombies.remove(i)
+            if isinstance(i,Bullet):
+                if i.ttl > 10:
+                    i.kill()
+      
+        e.objects.remove(c)
+        e.objects.append(c)
+           
+
+    e.key_events[pygame.K_a] = moveAndShoot
+    e.key_events[pygame.K_d] = moveAndShoot
+    e.key_events[pygame.K_w] = moveAndShoot
+    e.key_events[pygame.K_s] = moveAndShoot
+    e.key_events[pygame.K_SPACE] = moveAndShoot
+    
+    #Register zombie movements in event list
+    e.events[pygame.USEREVENT] = updateZoms
+    e.events[pygame.USEREVENT + 1] =  spwanZombies
+ 
+    
+    
+    #Sets up exit button to quit game
+    e.events[pygame.QUIT] = e.stop
+    
+    
+    #Runs the main game loop
+    e.run()
+
+    
+
+if __name__=='__main__':
+    main()
