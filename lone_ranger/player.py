@@ -62,6 +62,7 @@ class Player(Character):
         self.wave = 1
         # number of zomibes spawned in current wave
         self.zombieCount = 0
+        self.lastShot = pygame.time.get_ticks()
     def update_image(self):
         if self.state != State.MOVE:
             self.image = self.images[self.state][self.direction][self.frame % 10]
