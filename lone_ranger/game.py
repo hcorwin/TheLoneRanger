@@ -7,6 +7,7 @@ import league
 from player import Player
 from zombie import Zombie
 from overlay import Overlay
+from bullet import Bullet
 import random
 
 """This file is garbage. It was a hastily coded mockup
@@ -45,45 +46,79 @@ def main():
     e.objects.append(c)
     e.objects.append(o)
 
+    wave = 1
+    zombieCount = 0
     
-    #need to register more collisions with new zombie here
     
     #Register events?
     pygame.time.set_timer(pygame.USEREVENT + 0, 250// league.Settings.gameTimeFactor)
-    pygame.time.set_timer(pygame.USEREVENT + 1, 500 // league.Settings.gameTimeFactor)
+    pygame.time.set_timer(pygame.USEREVENT + 1, 250 // league.Settings.gameTimeFactor)
  
     #Player movements
 
-    e.key_events[pygame.K_a] = p.move
-    e.key_events[pygame.K_d] = p.move
-    e.key_events[pygame.K_w] = p.move
-    e.key_events[pygame.K_s] = p.move
+    zombies = []
+
     
-     def spwanZombies(time):
-        listx = [0, 0, 400, 800]
-        listy = [0, 300, 0, 300]
-        randomInt = random.randint(0,3)
-        if random.randint(1,100) > 75:
-            z = Zombie(p, 10, listx[randomInt], listy[randomInt])
-            e.drawables.add(z)
-            e.objects.append(z)
-            #z.blocks.add(t.impassable)
-            e.collisions[z] = (p, p.ouch)
+
+    def shoot(time):
+        now = pygame.time.get_ticks()
+        #if now - self.last_shoot > 500:
+        bullet = Bullet(p.direction,10, p.x, p.y)
+        
+        for zombie in zombies:
+            e.collisions[bullet] = (zombie,zombie.ouch)
+        e.objects.append(bullet)
+        e.drawables.add(bullet)
+        #self.last_shoot = now
+    
+   
+    '''
+    Spawns Zombies with a 25% freqency every 250ms
+    '''
+    def spwanZombies(time): 
+        if p.zombieCount < p.wave * 5:
+            if random.randint(1, 100) > 75:
+                z = Zombie(p,10, p.x + (c.width + 10), p.y)
+                e.drawables.add(z)
+                e.objects.append(z)     
+                e.collisions[z] = (p, p.ouch)
+                p.zombieCount = p.zombieCount +1
+                zombies.append(z)
+                
+                
+            
+    def moveAndShoot(time):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_w] or keys[pygame.K_a] or keys[pygame.K_s] or keys[pygame.K_d]  :
+            p.move(time ,pygame.key.get_pressed())
+        if  keys[pygame.K_SPACE]:
+            shoot(time)
+
+    '''
+    Moves zombies every 250ms
+    '''
 
     def updateZoms(time):
         for i in e.objects:
-            if isinstance(i,Zombie) and random.randint(1,100) > 50:
-                    i.move_towards_player(time)  
+            if isinstance(i,Zombie) and random.randint(1,100) > 25:
+                    i.move_towards_player(time)
+            #if isinstance(i.Bullet):
+             #   if i.ttl:
+              #      kill(i)
         e.objects.remove(c)
-        e.objects.append(c) 
-        print(len(e.objects))    
+        e.objects.append(c)
+           
+
+    e.key_events[pygame.K_a] = moveAndShoot
+    e.key_events[pygame.K_d] = moveAndShoot
+    e.key_events[pygame.K_w] = moveAndShoot
+    e.key_events[pygame.K_s] = moveAndShoot
+    e.key_events[pygame.K_SPACE] = moveAndShoot
     
     #Register zombie movements in event list
     e.events[pygame.USEREVENT] = updateZoms
     e.events[pygame.USEREVENT + 1] =  spwanZombies
-    #e.events[pygame.USEREVENT + 1] = q.move_right
-    #e.events[pygame.USEREVENT + 2] = q.move_up
-    #e.events[pygame.USEREVENT + 3] = q.move_down
+ 
     
     
     #Sets up exit button to quit game
