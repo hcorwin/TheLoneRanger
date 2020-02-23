@@ -59,11 +59,15 @@ def main():
     e.key_events[pygame.K_w] = p.move
     e.key_events[pygame.K_s] = p.move
     
-    def spwanZombies(time):       
-        if random.randint(1, 100) > 60:
-            z = Zombie(p,10, p.x + 100, p.y + 100)
+     def spwanZombies(time):
+        listx = [0, 0, 400, 800]
+        listy = [0, 300, 0, 300]
+        randomInt = random.randint(0,3)
+        if random.randint(1,100) > 75:
+            z = Zombie(p, 10, listx[randomInt], listy[randomInt])
             e.drawables.add(z)
-            e.objects.append(z)     
+            e.objects.append(z)
+            #z.blocks.add(t.impassable)
             e.collisions[z] = (p, p.ouch)
 
     def updateZoms(time):
