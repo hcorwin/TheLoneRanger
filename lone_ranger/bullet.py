@@ -87,12 +87,10 @@ class Bullet(Character):
         self.rect.x = self.x
         self.rect.y = self.y
 
-        #self.collisions = []
+        self.collisions = []
 
         for sprite in self.blocks:
             self.collider.rect.x = sprite.x
-            self.collider.rect.y = sprite.y
-
-        print(self.ttl)
+            self.collider.rect.y = sprite.y       
 
         self.ttl += 1

@@ -61,11 +61,16 @@ def main():
     zombies = []
 
     
+    def shot(zombie, bullet, time):
+        zombie.ouch()
+      #  e.objects.remove(bullet)
+       # e.drawables.remove(bullet)
+
 
     def shoot(time):
         now = pygame.time.get_ticks()
         if now - p.lastShot > 500:
-            bullet = Bullet(p.direction,10, p.x, p.y)
+            bullet = Bullet(p.direction,0, p.x - 32, p.y +32 )
             e.objects.append(bullet)
             e.drawables.add(bullet)
      
@@ -81,18 +86,15 @@ def main():
     Spawns Zombies with a 25% freqency every 250ms
     '''
     def spwanZombies(time): 
-        listx = [0, 0, 400, 800]
-        listy = [0, 300, 0, 300]
-        randomInt = random.randint(0, 3)
-        if p.zombieCount < p.wave * 5:
+        if p.zombieCount < 20:
             if random.randint(1, 100) > 75:
-                z = Zombie(p, 10, listx[randomInt], listy[randomInt])
+                z = Zombie(p,10, p.x + 350 , p.y +350)
                 e.drawables.add(z)
                 e.objects.append(z)     
                 e.collisions[z] = (p, p.ouch)
                 p.zombieCount = p.zombieCount +1
                 zombies.append(z)
-                
+    
                 
             
     def moveAndShoot(time):
@@ -109,14 +111,16 @@ def main():
     def updateZoms(time):
         for i in e.objects:
             if isinstance(i,Zombie):
-                if random.randint(1,100) > 25:
-                    i.move_towards_player(time)
+                #if random.randint(1,100) > 25:
+                  #  i.move_towards_player(time)
                 if i.health <= 0:
                     e.objects.remove(i)
                     e.drawables.remove(i)
+                    zombies.remove(i)
             if isinstance(i,Bullet):
-                if i.ttl > 10:
+                if i.ttl > 150:
                     i.kill()
+      
         e.objects.remove(c)
         e.objects.append(c)
            

@@ -1,6 +1,7 @@
 from league import *
 import pygame
 import random
+import math
 
 class Zombie(Character):
 
@@ -61,6 +62,11 @@ class Zombie(Character):
         self.icon[6] = pygame.transform.rotate(self.icon[0], 90).convert_alpha()
         self.icon[7] = pygame.transform.rotate(self.icon[0], 45).convert_alpha()
         self.icon[0] =  pygame.transform.rotate(self.icon[0], -45).convert_alpha()
+
+        self.delta = 80
+        self.shambleTimer = -999
+        self.targetX = random.randint(-125,125) + self.player.x
+        self.targetY = random.randint(-125,125) + self.player.y
     
 
     def move_left(self, time):
@@ -75,10 +81,10 @@ class Zombie(Character):
                 raise OffScreenLeftExcepzombietion
             else:
                 self.x = self.x - amount
-                self.update(0)
+                #self.update(0)
                 while(len(self.collisions) != 0):
                     self.x = self.x + amount
-                    self.update(0)
+                    #self.update(0)
         except:
             pass
             
@@ -97,11 +103,11 @@ class Zombie(Character):
             else:
                 self.x = self.x - amount
                 self.y = self.y - amount
-                self.update(0)
+                #self.update(0)
                 while(len(self.collisions) != 0):
                     self.x = self.x + amount
                     self.y = self.y + amount
-                    self.update(0)
+                 #   self.update(0)
         except:
             pass
             
@@ -117,10 +123,10 @@ class Zombie(Character):
                 raise OffScreenTopException
             else:
                 self.y = self.y - amount
-                self.update(0)
+                #self.update(0)
                 if len(self.collisions) != 0:
                     self.y = self.y + amount
-                    self.update(0)
+                    #self.update(0)
                     self.collisions = []
         except:
             pass
@@ -140,11 +146,11 @@ class Zombie(Character):
             else:
                 self.x = self.x + amount
                 self.y = self.y - amount
-                self.update(0)
+                #self.update(0)
                 while(len(self.collisions) != 0):
                     self.x = self.x - amount
                     self.y = self.y + amount
-                    self.update(0)
+                 #   self.update(0)
         except:
             pass
 
@@ -160,10 +166,10 @@ class Zombie(Character):
                 raise OffScreenRightException
             else:
                 self.x = self.x + amount
-                self.update(0)
+              #  self.update(0)
                 while(len(self.collisions) != 0):
                     self.x = self.x - amount
-                    self.update(0)
+               #     self.update(0)
         except:
             pass
             
@@ -182,11 +188,11 @@ class Zombie(Character):
             else:
                 self.x = self.x + amount
                 self.y = self.y + amount
-                self.update(0)
+               # self.update(0)
                 while(len(self.collisions) != 0):
                     self.x = self.x - amount
                     self.y = self.y - amount
-                    self.update(0)
+                #    self.update(0)
         except:
             pass
 
@@ -202,16 +208,16 @@ class Zombie(Character):
                 raise OffScreenBottomException
             else:
                 self.y = self.y + amount
-                self.update(0)
+                #self.update(0)
                 if len(self.collisions) != 0:
                     self.y = self.y - amount
-                    self.update(0)
+                  #  self.update(0)
                     self.collisions = []
         except:
             pass
             
     def move_left_down(self, time):
-
+ # Could keep track of rectangles and update here, but eh.
         self.image = self.icon[5]
         self.image = pygame.transform.scale(self.image, (64, 64))
     
@@ -225,11 +231,11 @@ class Zombie(Character):
             else:
                 self.x = self.x - amount
                 self.y = self.y + amount
-                self.update(0)
+                #self.update(0)
                 while(len(self.collisions) != 0):
                     self.x = self.x + amount
                     self.y = self.y + amount
-                    self.update(0)
+                   # self.update(0)
         except:
             pass
 
@@ -237,6 +243,8 @@ class Zombie(Character):
         self.rect.x = self.x
         self.rect.y = self.y
         self.collisions = []
+        self.move_towards_player(time)
+       
         for sprite in self.blocks:
             self.collider.rect.x= sprite.x
             self.collider.rect.y = sprite.y
@@ -246,9 +254,15 @@ class Zombie(Character):
     def ouch(self):
         now = pygame.time.get_ticks()
         if now - self.last_hit > 1000:
-            self.health = self.health - 10
+            self.health = self.health - 100
             self.last_hit = now
-        print("hits")
+
+    #function from https://community.esri.com/thread/158038 by user carlsunderman
+    def calculateDistance(self,x1,y1,x2,y2):  
+        dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)  
+        return dist 
+
+      
 
     def move_towards_player(self, time):
         # Find direction vector (dx, dy) between enemy and player.
@@ -257,29 +271,47 @@ class Zombie(Character):
         #NOTE (0, 0) START IN TOP LEFT CORNER
         
         move = None
+        now = pygame.time.get_ticks()
+        if  now - self.shambleTimer > 250:
+            #if (random.randint(0,100) > 25):
+            if  self.calculateDistance(self.player.x, self.player.y, self.x, self.y) < 100:
+                self.targetX = self.player.x 
+                self.targetY = self.player.y 
+            if  self.calculateDistance(self.player.x, self.player.y, self.x, self.y) > 100:
+                self.targetX = self.player.x  +random.randint(-50,50)
+                self.targetY = self.player.y  +random.randint(-50,50)
 
-        if (random.randint(0,100) > 25):
-            targetX = random.randint(-125,125) + self.player.x
-            targetY = random.randint(-125,125) + self.player.y
-        else:
-            targetX = self.player.x
-            targetY = self.player.y
+                self.shambleTimer = now
+            if  self.calculateDistance(self.player.x, self.player.y, self.x, self.y) > 250:
+                self.targetX = self.player.x +random.randint(-100,100)
+                self.targetY = self.player.y +random.randint(-100,100)
+
+                self.shambleTimer = now
+            if  self.calculateDistance(self.player.x, self.player.y, self.x, self.y) >= 250:
+                self.targetX = random.randint(-350,350) + self.player.x
+                self.targetY = random.randint(-350,350) + self.player.y
+                self.shambleTimer = now
+            if  self.calculateDistance(self.player.x, self.player.y, self.x, self.y) > 1000:
+                self.targetX = random.randint(-250,250) + self.x
+                self.targetY = random.randint(-250,250) + self.y
+                self.shambleTimer = now
+
         
-        if self.x > targetX and self.y == targetY:
+        if self.x > self.targetX and self.y == self.targetY:
             self.move_left(time)
-        elif self.x < targetX and self.y == targetY:
+        elif self.x < self.targetX and self.y == self.targetY:
             self.move_right(time)
-        elif self.x == targetX and self.y > targetY:
+        elif self.x == self.targetX and self.y > self.targetY:
             self.move_up(time)
-        elif self.x == targetX and self.y < targetY:
+        elif self.x == self.targetX and self.y < self.targetY:
             self.move_down(time)
-        elif self.x > targetX and self.y > targetY:
+        elif self.x > self.targetX and self.y > self.targetY:
             self.move_left_up(time)
-        elif self.x > targetX and self.y < targetY:
+        elif self.x > self.targetX and self.y < self.targetY:
             self.move_left_down(time)
-        elif self.x < targetX and self.y > targetY:
+        elif self.x < self.targetX and self.y > self.targetY:
             self.move_right_up(time)
-        elif self.x < targetX and self.y < targetY:
+        elif self.x < self.targetX and self.y < self.targetY:
             self.move_right_down(time)
         else:
             pass
