@@ -47,6 +47,9 @@ class Zombie(Character):
         self.collider.rect = self.collider.image.get_rect()
         # Overlay
         self.font = pygame.font.Font('freesansbold.ttf',32)
+        #zombie sounds
+        self.zombie_sound = sound
+        self.zombie_sound.set_volume(0.3)
        
         
         #Zombie uses player object to find x y location on map and go after him
@@ -256,6 +259,7 @@ class Zombie(Character):
         if now - self.last_hit > 1000:
             self.health = self.health - 100
             self.last_hit = now
+            self.zombie_sound.play()
 
     #function from https://community.esri.com/thread/158038 by user carlsunderman
     def calculateDistance(self,x1,y1,x2,y2):  
