@@ -46,12 +46,20 @@ def main():
     e.objects.append(c)
     e.objects.append(o)
 
+    shot_sound = pygame.mixer.Sound('./assets/gunshot.ogg')
+    shot_sound.set_volume(0.8)
+    zombie_sound = pygame.mixer.Sound('./assets/zombie.ogg')
+    zombie_sound.set_volume(0.3)
+    pygame.mixer.music.load('./assets/ANewJourney.ogg')
+    pygame.mixer.music.play(-1)
+    pygame.mixer.music.set_volume(0.3)
+    
     wave = 1
     zombieCount = 0
     
     
     #Register events?
-    pygame.time.set_timer(pygame.USEREVENT + 0, 10// league.Settings.gameTimeFactor)
+    pygame.time.set_timer(pygame.USEREVENT + 0, 250// league.Settings.gameTimeFactor)
     pygame.time.set_timer(pygame.USEREVENT + 1, 250 // league.Settings.gameTimeFactor)
  
     #Player movements
@@ -60,9 +68,12 @@ def main():
     
     zombies = []
 
+    
+
     def shoot(time):
         now = pygame.time.get_ticks()
         if now - p.lastShot > 500:
+            shot_sound.play()
             bullet = Bullet(p.direction,10, p.x, p.y)
             e.objects.append(bullet)
             e.drawables.add(bullet)
@@ -73,29 +84,25 @@ def main():
            
 
             p.lastShot = now
-            e.objects.remove(c)
-            e.objects.append(c)
     
    
     '''
     Spawns Zombies with a 25% freqency every 250ms
     '''
-    def spwanZombies(time): 
+    def spwanZombies(time):
+        listx = [0, 0, 400, 800]
+        listy = [0, 300, 0, 300]
+        randomInt = random.randint(0, 3)
         if p.zombieCount < p.wave * 5:
-            listx = [0, 0, 400, 800]
-            listy = [0, 300, 0, 300]
-            randomInt = random.randint(0, 3)
-            if p.zombieCount < p.wave * 5:
-                if random.randint(1, 100) > 75:
-                    z = Zombie(p, 10, listx[randomInt], listy[randomInt])
-                    e.drawables.add(z)
-                    e.objects.append(z)     
-                    e.collisions[z] = (p, p.ouch)
-                    p.zombieCount = p.zombieCount +1
-                    zombies.append(z)               
-                    e.objects.remove(c)
-                    e.objects.append(c)
-    
+            if random.randint(1, 100) > 75:
+                z = Zombie(p, zombie_sound, 10, listx[randomInt], listy[randomInt])
+                e.drawables.add(z)
+                e.objects.append(z)     
+                e.collisions[z] = (p, p.ouch)
+                p.zombieCount = p.zombieCount +1
+                zombies.append(z)
+                zombie_sound.play()
+                
                 
             
     def moveAndShoot(time):
@@ -112,25 +119,16 @@ def main():
     def updateZoms(time):
         for i in e.objects:
             if isinstance(i,Zombie):
+                if random.randint(1,100) > 25:
+                    i.move_towards_player(time)
                 if i.health <= 0:
                     e.objects.remove(i)
                     e.drawables.remove(i)
-                    zombies.remove(i)
-                    p.kills += 1 
-                    if p.zombieCount == p.wave *5 and  not zombies:
-                        p.wave += 1
-                        p.zombieCount = 0
-                        print("new wave", p.wave)
-                        
             if isinstance(i,Bullet):
-                if i.ttl > 250:
-                    e.objects.remove(i)
-                    e.drawables.remove(i)
-        if p.lives < 0:
-            print(p.kills)
-            exit()
-
-       
+                if i.ttl > 10:
+                    i.kill()
+        e.objects.remove(c)
+        e.objects.append(c)
            
 
     e.key_events[pygame.K_a] = moveAndShoot
